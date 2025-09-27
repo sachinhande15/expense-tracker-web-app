@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -13,40 +13,52 @@ import {
   Chip,
   Alert,
   CircularProgress,
-  Paper
-} from '@mui/material';
-import {
-  Search,
-  Refresh
-} from '@mui/icons-material';
-import { useExpense } from '../../contexts/ExpenseContext';
-import ExpenseCard from './ExpenseCard';
-import { EXPENSE_CATEGORIES } from '../../types/expense';
-import { formatCurrency, getCategoryIcon, debounce } from '../../utils/helpers';
+  Paper,
+} from "@mui/material";
+import { Search, Refresh } from "@mui/icons-material";
+import { useExpense } from "../../contexts/ExpenseContext";
+import DeleteConfirmDialog from "./DeleteConfirmDialog";
+import ExpenseCard from "./ExpenseCard";
+import { EXPENSE_CATEGORIES , CATEGORY_ICONS, CATEGORY_IDS} from "../../types/expense";
+import { formatCurrency, debounce } from "../../utils/helpers";
 
-const ExpenseList = ({ onEdit, onDelete }) => {
-  const { expenses, loading, searchExpenses } = useExpense();
+const ExpenseList = ({ onEdit }) => {
+  const { expenses, loading, searchExpenses, deleteExpense } = useExpense();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('date');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("date");
+  const [sortOrder, setSortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // ✅ CHANGED
+  const [selectedExpense, setSelectedExpense] = useState(null); // ✅ CHANGED
+
   const itemsPerPage = 6;
 
   // Debounced search
   const debouncedSearch = useMemo(
-    () => debounce((query) => {
-      setSearchQuery(query);
-      setCurrentPage(1);
-    }, 300),
+    () =>
+      debounce((query) => {
+        setSearchQuery(query);
+        setCurrentPage(1);
+      }, 300),
     []
   );
 
   const handleSearchChange = (event) => {
     debouncedSearch(event.target.value);
   };
+  const handleDeleteClick = (expense) => {
+    // ✅ CHANGED
+    setSelectedExpense(expense);
+    setDeleteDialogOpen(true);
+  };
 
+  const handleDeleteConfirm = async (id) => {
+    // ✅ CHANGED
+    await deleteExpense(id);
+    setDeleteDialogOpen(false);
+  };
   // Filter and sort expenses
   const filteredAndSortedExpenses = useMemo(() => {
     let filtered = expenses;
@@ -57,8 +69,10 @@ const ExpenseList = ({ onEdit, onDelete }) => {
     }
 
     // Apply category filter
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(expense => expense.category === selectedCategory);
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(
+        (expense) => expense.categoryName === selectedCategory
+      );
     }
 
     // Apply sorting
@@ -66,26 +80,26 @@ const ExpenseList = ({ onEdit, onDelete }) => {
       let aValue, bValue;
 
       switch (sortBy) {
-        case 'amount':
+        case "amount":
           aValue = a.amount;
           bValue = b.amount;
           break;
-        case 'title':
+        case "title":
           aValue = a.title.toLowerCase();
           bValue = b.title.toLowerCase();
           break;
-        case 'category':
-          aValue = a.category.toLowerCase();
-          bValue = b.category.toLowerCase();
+        case "category":
+          aValue = a.categoryName.toLowerCase();
+          bValue = b.categoryName.toLowerCase();
           break;
-        case 'date':
+        case "date":
         default:
           aValue = new Date(a.date);
           bValue = new Date(b.date);
           break;
       }
 
-      if (sortOrder === 'asc') {
+      if (sortOrder === "asc") {
         return aValue > bValue ? 1 : -1;
       } else {
         return aValue < bValue ? 1 : -1;
@@ -93,12 +107,22 @@ const ExpenseList = ({ onEdit, onDelete }) => {
     });
 
     return filtered;
-  }, [expenses, searchQuery, selectedCategory, sortBy, sortOrder, searchExpenses]);
+  }, [
+    expenses,
+    searchQuery,
+    selectedCategory,
+    sortBy,
+    sortOrder,
+    searchExpenses,
+  ]);
 
   // Pagination
   const totalPages = Math.ceil(filteredAndSortedExpenses.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedExpenses = filteredAndSortedExpenses.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedExpenses = filteredAndSortedExpenses.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -110,20 +134,30 @@ const ExpenseList = ({ onEdit, onDelete }) => {
 
   // Calculate summary for current filtered results
   const summary = useMemo(() => {
-    const total = filteredAndSortedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    const total = filteredAndSortedExpenses.reduce(
+      (sum, exp) => sum + exp.amount,
+      0
+    );
     const count = filteredAndSortedExpenses.length;
     const average = count > 0 ? total / count : 0;
 
     return {
       total,
       count,
-      average
+      average,
     };
   }, [filteredAndSortedExpenses]);
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          py: 8,
+        }}
+      >
         <CircularProgress size={60} />
         <Typography variant="h6" sx={{ ml: 2 }}>
           Loading expenses...
@@ -141,17 +175,17 @@ const ExpenseList = ({ onEdit, onDelete }) => {
             elevation={2}
             sx={{
               p: 2,
-              textAlign: 'center',
+              textAlign: "center",
               borderRadius: 3,
-              bgcolor: 'primary.light',
-              color: 'white'
+              bgcolor: "primary.light",
+              color: "white",
             }}
           >
             <Typography variant="h4" sx={{ fontWeight: 700 }}>
               {formatCurrency(summary.total)}
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              Total Amount
+              {`Total Amount of ${selectedCategory} Category.`}
             </Typography>
           </Paper>
         </Grid>
@@ -160,10 +194,10 @@ const ExpenseList = ({ onEdit, onDelete }) => {
             elevation={2}
             sx={{
               p: 2,
-              textAlign: 'center',
+              textAlign: "center",
               borderRadius: 3,
-              bgcolor: 'success.light',
-              color: 'white'
+              bgcolor: "success.light",
+              color: "white",
             }}
           >
             <Typography variant="h4" sx={{ fontWeight: 700 }}>
@@ -179,10 +213,10 @@ const ExpenseList = ({ onEdit, onDelete }) => {
             elevation={2}
             sx={{
               p: 2,
-              textAlign: 'center',
+              textAlign: "center",
               borderRadius: 3,
-              bgcolor: 'warning.light',
-              color: 'white'
+              bgcolor: "warning.light",
+              color: "white",
             }}
           >
             <Typography variant="h4" sx={{ fontWeight: 700 }}>
@@ -197,7 +231,14 @@ const ExpenseList = ({ onEdit, onDelete }) => {
 
       {/* Filters and Search */}
       <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, alignItems: { md: 'center' } }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 2,
+            alignItems: { md: "center" },
+          }}
+        >
           {/* Search */}
           <TextField
             placeholder="Search expenses..."
@@ -222,19 +263,12 @@ const ExpenseList = ({ onEdit, onDelete }) => {
                 setCurrentPage(1);
               }}
               label="Category"
-              startAdornment={
-                selectedCategory !== 'all' ? (
-                  <Box sx={{ ml: 1, mr: 1 }}>
-                    {getCategoryIcon(selectedCategory)}
-                  </Box>
-                ) : null
-              }
             >
               <MenuItem value="all">All Categories</MenuItem>
               {Object.values(EXPENSE_CATEGORIES).map((category) => (
-                <MenuItem key={category} value={category}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <span>{getCategoryIcon(category)}</span>
+                <MenuItem key={CATEGORY_IDS[category]} value={category}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <span>{CATEGORY_ICONS[category]}</span>
                     {category}
                   </Box>
                 </MenuItem>
@@ -274,32 +308,46 @@ const ExpenseList = ({ onEdit, onDelete }) => {
             label="Refresh"
             onClick={handleRefresh}
             variant="outlined"
-            sx={{ cursor: 'pointer' }}
+            sx={{ cursor: "pointer" }}
           />
         </Box>
       </Paper>
 
       {/* Results Info */}
-      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box
+        sx={{
+          mb: 2,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography variant="body2" color="text.secondary">
-          Showing {paginatedExpenses.length} of {filteredAndSortedExpenses.length} expenses
+          Showing {paginatedExpenses.length} of{" "}
+          {filteredAndSortedExpenses.length} expenses
         </Typography>
-        {selectedCategory !== 'all' && (
+        {selectedCategory !== "all" && (
           <Chip
             label={`Category: ${selectedCategory}`}
-            onDelete={() => setSelectedCategory('all')}
+            onDelete={() => setSelectedCategory("all")}
             size="small"
           />
         )}
       </Box>
+      {/* ✅ Delete Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        expense={selectedExpense}
+      />
 
       {/* No Results */}
       {filteredAndSortedExpenses.length === 0 ? (
         <Alert severity="info" sx={{ borderRadius: 2 }}>
-          {searchQuery || selectedCategory !== 'all'
-            ? 'No expenses found matching your criteria.'
-            : 'No expenses recorded yet. Add your first expense to get started!'
-          }
+          {searchQuery || selectedCategory !== "all"
+            ? "No expenses found matching your criteria."
+            : "No expenses recorded yet. Add your first expense to get started!"}
         </Alert>
       ) : (
         <>
@@ -310,7 +358,7 @@ const ExpenseList = ({ onEdit, onDelete }) => {
                 <ExpenseCard
                   expense={expense}
                   onEdit={onEdit}
-                  onDelete={onDelete}
+                  onDelete={handleDeleteClick}
                 />
               </Grid>
             ))}
@@ -318,7 +366,7 @@ const ExpenseList = ({ onEdit, onDelete }) => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
               <Pagination
                 count={totalPages}
                 page={currentPage}
@@ -326,9 +374,9 @@ const ExpenseList = ({ onEdit, onDelete }) => {
                 color="primary"
                 size="large"
                 sx={{
-                  '& .MuiPaginationItem-root': {
-                    borderRadius: 2
-                  }
+                  "& .MuiPaginationItem-root": {
+                    borderRadius: 2,
+                  },
                 }}
               />
             </Box>

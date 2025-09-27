@@ -30,9 +30,9 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
     try {
-      const response = await expenseService.login({ username, password });
+      const response = await expenseService.login({ email, password });
       if (response.success) {
         const userData = expenseService.getCurrentUser();
         setUser(userData);
@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
+    console.log("user data is ", userData)
     try {
       const response = await expenseService.register(userData);
       if (response.success) {
@@ -73,7 +74,9 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    setUser,
     isAuthenticated,
+    setIsAuthenticated,
     loading,
     login,
     register,

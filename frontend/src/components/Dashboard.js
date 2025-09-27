@@ -21,17 +21,16 @@ import {
 import {
   Logout,
   TrendingUp,
-  AttachMoney,
   Category,
   Add,
   BarChart,
   List,
-  PieChart
+  PieChart,
+  CurrencyRupee
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import ExpenseForm from './expenses/ExpenseForm';
 import ExpenseList from './expenses/ExpenseList';
-import DeleteConfirmDialog from './expenses/DeleteConfirmDialog';
 import ExpenseCharts from './charts/ExpenseCharts';
 import { formatCurrency } from '../utils/helpers';
 
@@ -43,10 +42,7 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [editingExpense, setEditingExpense] = useState(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [expenseToDelete, setExpenseToDelete] = useState(null);
 
-  // Get time-based greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good Morning';
@@ -54,14 +50,12 @@ const Dashboard = () => {
     return 'Good Evening';
   };
 
-  // Get user initials for avatar
-  const getUserInitials = (name) => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const getUserInitials = (value) => {
+    if (!value) return "U";
+    const cleaned = value.split(/[@._]/)[0];
+    const words = cleaned.split(" ").filter(Boolean);
+    if (words.length === 1) return words[0].charAt(0).toUpperCase();
+    return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
   };
 
   const handleLogout = () => {
@@ -80,26 +74,15 @@ const Dashboard = () => {
     setShowExpenseForm(true);
   };
 
-  const handleDeleteExpense = (expense) => {
-    setExpenseToDelete(expense);
-    setDeleteDialogOpen(true);
-  };
-
   const handleFormClose = () => {
     setShowExpenseForm(false);
     setEditingExpense(null);
   };
 
-  const handleFormSuccess = (expense) => {
+  const handleFormSuccess = () => {
     setShowExpenseForm(false);
     setEditingExpense(null);
     toast.success(editingExpense ? 'Expense updated successfully!' : 'Expense added successfully!');
-  };
-
-  const handleDeleteConfirm = () => {
-    // The actual deletion is handled in ExpenseList component
-    setDeleteDialogOpen(false);
-    setExpenseToDelete(null);
   };
 
   const handleTabChange = (event, newValue) => {
@@ -107,48 +90,61 @@ const Dashboard = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: '#fafafa' }}>
-      {/* Modern App Bar */}
+    <Box sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: '#f4f6f8', position: 'relative' }}>
+      {/* Floating Background Circles */}
+      <Box sx={{
+        position: 'absolute',
+        top: -100,
+        left: -100,
+        width: 300,
+        height: 300,
+        bgcolor: 'primary.light',
+        opacity: 0.15,
+        borderRadius: '50%',
+        zIndex: 0
+      }} />
+      <Box sx={{
+        position: 'absolute',
+        bottom: -150,
+        right: -150,
+        width: 400,
+        height: 400,
+        bgcolor: 'secondary.light',
+        opacity: 0.15,
+        borderRadius: '50%',
+        zIndex: 0
+      }} />
+
+      {/* Modern Navbar */}
       <AppBar
         position="static"
         elevation={0}
         sx={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          zIndex: 1000
         }}
       >
         <Toolbar>
           <Typography
             variant="h6"
-            component="div"
             sx={{
               flexGrow: 1,
               fontWeight: 700,
               background: 'linear-gradient(45deg, #fff 30%, #f0f0f0 90%)',
               WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
+              WebkitTextFillColor: 'transparent'
             }}
           >
             💰 Expense Tracker
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: 'rgba(255, 255, 255, 0.2)',
-                  fontSize: '0.875rem',
-                  fontWeight: 600
-                }}
-              >
-                {getUserInitials(user?.name || 'U')}
-              </Avatar>
-              <Typography variant="body2" sx={{ color: 'white', fontWeight: 500 }}>
-                {user?.name}
-              </Typography>
-            </Box>
+            <Avatar sx={{ width: 32, height: 32, bgcolor: 'rgba(255,255,255,0.2)', fontSize: '0.875rem' }}>
+              {getUserInitials(user?.username || user?.email)}
+            </Avatar>
+            <Typography variant="body2" sx={{ color: 'white', fontWeight: 500 }}>
+              {user?.name}
+            </Typography>
             <Button
               color="inherit"
               startIcon={<Logout />}
@@ -157,9 +153,7 @@ const Dashboard = () => {
                 textTransform: 'none',
                 borderRadius: 2,
                 px: 2,
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                }
+                '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
               }}
             >
               Logout
@@ -168,8 +162,8 @@ const Dashboard = () => {
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-        {/* Enhanced Welcome Section */}
+      <Container maxWidth="xl" sx={{ mt: 4, mb: 4, position: 'relative', zIndex: 1 }}>
+        {/* Welcome Card */}
         <Paper
           elevation={3}
           sx={{
@@ -179,35 +173,24 @@ const Dashboard = () => {
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             color: 'white',
             position: 'relative',
-            overflow: 'hidden',
-            '&::before': {
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              width: '200px',
-              height: '200px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '50%',
-              transform: 'translate(50%, -50%)'
-            }
+            overflow: 'hidden'
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
             <Avatar
               sx={{
                 width: 80,
                 height: 80,
-                bgcolor: 'rgba(255, 255, 255, 0.2)',
+                bgcolor: 'rgba(255,255,255,0.2)',
                 fontSize: '2rem',
                 fontWeight: 700,
-                border: '3px solid rgba(255, 255, 255, 0.3)'
+                border: '3px solid rgba(255,255,255,0.3)'
               }}
             >
-              {getUserInitials(user?.name || 'U')}
+              {getUserInitials(user?.username || user?.email)}
             </Avatar>
             <Box>
-              <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
                 {getGreeting()}, {user?.name}!
               </Typography>
               <Typography variant="body1" sx={{ opacity: 0.9, fontSize: '1.1rem' }}>
@@ -217,98 +200,62 @@ const Dashboard = () => {
           </Box>
         </Paper>
 
-        {/* Enhanced Summary Cards */}
+        {/* Summary Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6} lg={3}>
-            <Card
-              elevation={4}
-              sx={{
-                borderRadius: 4,
-                transition: 'all 0.3s ease-in-out',
-                '&:hover': {
-                  transform: 'translateY(-8px)',
-                  boxShadow: '0 12px 40px rgba(0,0,0,0.15)'
-                }
-              }}
-            >
+          {/* Total Expenses */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Card elevation={4} sx={{ borderRadius: 4 }}>
               <CardContent sx={{ textAlign: 'center', p: 4 }}>
-                <AttachMoney sx={{ fontSize: 56, color: 'primary.main', mb: 2 }} />
-                <Typography variant="h3" component="div" sx={{ fontWeight: 700, color: 'primary.main', mb: 1 }}>
+                <CurrencyRupee sx={{ fontSize: 26, color: 'primary.main', mb: 2 }} />
+                <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
                   {loading ? '...' : formatCurrency(summary.totalExpenses)}
                 </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
-                  Total Expenses
+                <Typography variant="body2" color="text.secondary">
+                  Total Amount
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} lg={3}>
-            <Card
-              elevation={4}
-              sx={{
-                borderRadius: 4,
-                transition: 'all 0.3s ease-in-out',
-                '&:hover': {
-                  transform: 'translateY(-8px)',
-                  boxShadow: '0 12px 40px rgba(0,0,0,0.15)'
-                }
-              }}
-            >
+          {/* Monthly Spend */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Card elevation={4} sx={{ borderRadius: 4 }}>
               <CardContent sx={{ textAlign: 'center', p: 4 }}>
-                <TrendingUp sx={{ fontSize: 56, color: 'success.main', mb: 2 }} />
-                <Typography variant="h3" component="div" sx={{ fontWeight: 700, color: 'success.main', mb: 1 }}>
+                <TrendingUp sx={{ fontSize: 26, color: 'success.main', mb: 2 }} />
+                <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main' }}>
                   {loading ? '...' : formatCurrency(summary.monthlyTotal)}
                 </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
+                <Typography variant="body2" color="text.secondary">
                   This Month
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} lg={3}>
-            <Card
-              elevation={4}
-              sx={{
-                borderRadius: 4,
-                transition: 'all 0.3s ease-in-out',
-                '&:hover': {
-                  transform: 'translateY(-8px)',
-                  boxShadow: '0 12px 40px rgba(0,0,0,0.15)'
-                }
-              }}
-            >
+          {/* Total Items */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Card elevation={4} sx={{ borderRadius: 4 }}>
               <CardContent sx={{ textAlign: 'center', p: 4 }}>
-                <Category sx={{ fontSize: 56, color: 'warning.main', mb: 2 }} />
-                <Typography variant="h3" component="div" sx={{ fontWeight: 700, color: 'warning.main', mb: 1 }}>
+                <Category sx={{ fontSize: 28, color: 'warning.main', mb: 2 }} />
+                <Typography variant="h4" sx={{ fontWeight: 700, color: 'warning.main' }}>
                   {loading ? '...' : summary.totalCount}
                 </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
+                <Typography variant="body2" color="text.secondary">
                   Total Items
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          <Grid item xs={12} sm={6} lg={3}>
-            <Card
-              elevation={4}
-              sx={{
-                borderRadius: 4,
-                transition: 'all 0.3s ease-in-out',
-                '&:hover': {
-                  transform: 'translateY(-8px)',
-                  boxShadow: '0 12px 40px rgba(0,0,0,0.15)'
-                }
-              }}
-            >
+          {/* Categories */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Card elevation={4} sx={{ borderRadius: 4 }}>
               <CardContent sx={{ textAlign: 'center', p: 4 }}>
-                <BarChart sx={{ fontSize: 56, color: 'info.main', mb: 2 }} />
-                <Typography variant="h3" component="div" sx={{ fontWeight: 700, color: 'info.main', mb: 1 }}>
+                <BarChart sx={{ fontSize: 28, color: 'info.main', mb: 2 }} />
+                <Typography variant="h4" sx={{ fontWeight: 700, color: 'info.main' }}>
                   {loading ? '...' : Object.keys(summary.categorySummary).length}
                 </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
+                <Typography variant="body2" color="text.secondary">
                   Categories
                 </Typography>
               </CardContent>
@@ -316,7 +263,7 @@ const Dashboard = () => {
           </Grid>
         </Grid>
 
-        {/* Main Content Tabs */}
+        {/* Main Tabs */}
         <Paper elevation={3} sx={{ borderRadius: 4 }}>
           <Tabs
             value={activeTab}
@@ -324,44 +271,25 @@ const Dashboard = () => {
             sx={{
               borderBottom: 1,
               borderColor: 'divider',
-              '& .MuiTab-root': {
-                textTransform: 'none',
-                fontWeight: 600,
-                minHeight: 72,
-                fontSize: '1rem'
-              }
+              '& .MuiTab-root': { textTransform: 'none', fontWeight: 600 }
             }}
           >
-            <Tab
-              icon={<List />}
-              label="Expenses"
-              iconPosition="start"
-              sx={{ minHeight: 72 }}
-            />
-            <Tab
-              icon={<PieChart />}
-              label="Analytics"
-              iconPosition="start"
-              sx={{ minHeight: 72 }}
-            />
+            <Tab icon={<List />} label="Expenses" iconPosition="start" />
+            <Tab icon={<PieChart />} label="Analytics" iconPosition="start" />
           </Tabs>
 
           <Box sx={{ p: 3 }}>
             {activeTab === 0 && (
               <ExpenseList
                 onEdit={handleEditExpense}
-                onDelete={handleDeleteExpense}
               />
             )}
-
-            {activeTab === 1 && (
-              <ExpenseCharts />
-            )}
+            {activeTab === 1 && <ExpenseCharts />}
           </Box>
         </Paper>
       </Container>
 
-      {/* Enhanced Floating Action Button */}
+      {/* Floating Action Button */}
       <Fab
         color="primary"
         aria-label="add expense"
@@ -372,30 +300,19 @@ const Dashboard = () => {
           right: 24,
           width: 64,
           height: 64,
-          boxShadow: '0 6px 25px rgba(102, 126, 234, 0.4)',
-          '&:hover': {
-            transform: 'scale(1.1)',
-            boxShadow: '0 8px 30px rgba(102, 126, 234, 0.5)'
-          }
+          boxShadow: '0 6px 25px rgba(102,126,234,0.4)',
+          '&:hover': { transform: 'scale(1.1)', boxShadow: '0 8px 30px rgba(102,126,234,0.5)' }
         }}
       >
         <Add />
       </Fab>
 
-      {/* Expense Form Dialog */}
+      {/* Expense Form */}
       <ExpenseForm
         open={showExpenseForm}
         onClose={handleFormClose}
         expense={editingExpense}
         onSuccess={handleFormSuccess}
-      />
-
-      {/* Delete Confirmation Dialog */}
-      <DeleteConfirmDialog
-        open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        expense={expenseToDelete}
       />
     </Box>
   );

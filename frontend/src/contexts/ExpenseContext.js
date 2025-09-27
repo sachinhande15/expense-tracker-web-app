@@ -1,7 +1,7 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
 import expenseService from '../services/expenseService';
 import { toast } from 'react-toastify';
-
+import {useAuth} from './AuthContext'
 const ExpenseContext = createContext();
 
 export const useExpense = () => {
@@ -21,6 +21,7 @@ export const ExpenseProvider = ({ children }) => {
     categorySummary: {},
     monthlyTotal: 0
   });
+  const { isAuthenticated } = useAuth();
 
   // Load expenses on component mount
   useEffect(() => {
@@ -28,7 +29,7 @@ export const ExpenseProvider = ({ children }) => {
       loadExpenses();
       loadSummary();
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Load all expenses
   const loadExpenses = async () => {
@@ -62,6 +63,7 @@ export const ExpenseProvider = ({ children }) => {
   // Add new expense
   const addExpense = async (expenseData) => {
     setLoading(true);
+    console.log("add expense data is ", expenseData);
     try {
       const response = await expenseService.createExpense(expenseData);
       if (response.success) {
@@ -156,12 +158,14 @@ export const ExpenseProvider = ({ children }) => {
   // Search expenses
   const searchExpenses = (query) => {
     const lowercaseQuery = query.toLowerCase();
-    return expenses.filter(expense =>
-      expense.title.toLowerCase().includes(lowercaseQuery) ||
-      expense.description?.toLowerCase().includes(lowercaseQuery) ||
-      expense.category.toLowerCase().includes(lowercaseQuery)
+    return expenses.filter(
+      (expense) =>
+        (expense.title || "").toLowerCase().includes(lowercaseQuery) ||
+        (expense.description || "").toLowerCase().includes(lowercaseQuery) ||
+        (expense.category || "").toLowerCase().includes(lowercaseQuery)
     );
   };
+
 
   // Filter expenses by date range
   const filterExpensesByDate = (startDate, endDate) => {

@@ -1,6 +1,11 @@
 // Real API service - connects to Spring Boot backend
 import axios from 'axios';
 import API_CONFIG from './apiConfig';
+import { storage } from '../utils/storage';
+
+
+const TOKEN_KEY = 'token';
+const USER_KEY = 'user';
 
 class ExpenseService {
 
@@ -16,7 +21,7 @@ class ExpenseService {
     // Add request interceptor to include auth token
     this.api.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token');
+        const token = storage.get(TOKEN_KEY);
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -34,9 +39,7 @@ class ExpenseService {
       },
       (error) => {
         if (error.response?.status === 401) {
-          // Token expired or invalid
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          this.logout();
           window.location.href = '/login';
         }
         return Promise.reject(error);
@@ -175,9 +178,9 @@ class ExpenseService {
       const response = await this.api.post('/auth/login', credentials);
       const { token, id, username, email } = response.data;
 
-      // Store token and user info
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify({ id, username, email }));
+      // Store token & user safely
+      storage.set(TOKEN_KEY, token, 1000 * 60 * 60); // 1 hour expiry
+      storage.set(USER_KEY, { id, username, email }, 1000 * 60 * 60);
 
       return {
         success: true,
@@ -212,19 +215,18 @@ class ExpenseService {
 
   // Logout
   logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    storage.remove(TOKEN_KEY);
+    storage.remove(USER_KEY);
   }
 
   // Check if user is authenticated
   isAuthenticated() {
-    return !!localStorage.getItem('token');
+    return !!storage.get(TOKEN_KEY);
   }
 
   // Get current user
   getCurrentUser() {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    return storage.get(USER_KEY);
   }
 }
 

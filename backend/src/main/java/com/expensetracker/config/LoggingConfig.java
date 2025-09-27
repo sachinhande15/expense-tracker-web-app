@@ -10,8 +10,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class LoggingConfig implements WebMvcConfigurer {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoggingConfig.class);
-
     @Bean
     public RequestLoggingInterceptor requestLoggingInterceptor() {
         return new RequestLoggingInterceptor();
@@ -30,19 +28,18 @@ public class LoggingConfig implements WebMvcConfigurer {
 
         @Override
         public boolean preHandle(jakarta.servlet.http.HttpServletRequest request,
-                                jakarta.servlet.http.HttpServletResponse response,
-                                Object handler) throws Exception {
+                jakarta.servlet.http.HttpServletResponse response,
+                Object handler) throws Exception {
 
             String clientIP = getClientIP(request);
             String userAgent = request.getHeader("User-Agent");
 
             requestLogger.info("REQUEST - Method: {}, URI: {}, ClientIP: {}, UserAgent: {}, SessionID: {}",
-                request.getMethod(),
-                request.getRequestURI(),
-                clientIP,
-                userAgent != null ? userAgent : "Unknown",
-                request.getSession(false) != null ? request.getSession().getId() : "NoSession"
-            );
+                    request.getMethod(),
+                    request.getRequestURI(),
+                    clientIP,
+                    userAgent != null ? userAgent : "Unknown",
+                    request.getSession(false) != null ? request.getSession().getId() : "NoSession");
 
             // Set start time for processing time calculation
             request.setAttribute("startTime", System.currentTimeMillis());
@@ -52,23 +49,21 @@ public class LoggingConfig implements WebMvcConfigurer {
 
         @Override
         public void afterCompletion(jakarta.servlet.http.HttpServletRequest request,
-                                   jakarta.servlet.http.HttpServletResponse response,
-                                   Object handler, Exception ex) throws Exception {
+                jakarta.servlet.http.HttpServletResponse response,
+                Object handler, Exception ex) throws Exception {
 
             Long startTime = (Long) request.getAttribute("startTime");
             if (startTime != null) {
                 requestLogger.info("RESPONSE - Method: {}, URI: {}, Status: {}, ProcessingTime: {}ms",
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    response.getStatus(),
-                    System.currentTimeMillis() - startTime
-                );
+                        request.getMethod(),
+                        request.getRequestURI(),
+                        response.getStatus(),
+                        System.currentTimeMillis() - startTime);
             } else {
                 requestLogger.info("RESPONSE - Method: {}, URI: {}, Status: {}",
-                    request.getMethod(),
-                    request.getRequestURI(),
-                    response.getStatus()
-                );
+                        request.getMethod(),
+                        request.getRequestURI(),
+                        response.getStatus());
             }
 
             if (ex != null) {

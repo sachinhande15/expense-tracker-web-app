@@ -21,6 +21,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useExpense } from '../../contexts/ExpenseContext';
 import { EXPENSE_CATEGORIES, validateExpenseForm } from '../../types/expense';
 import { getCategoryIcon } from '../../utils/helpers';
+import { CATEGORY_IDS } from '../../types/expense';
 
 const ExpenseForm = ({ open, onClose, expense = null, onSuccess }) => {
   const { addExpense, updateExpense } = useExpense();
@@ -89,11 +90,14 @@ const ExpenseForm = ({ open, onClose, expense = null, onSuccess }) => {
 
     setLoading(true);
     try {
-      const expenseData = {
-        ...formData,
-        amount: parseFloat(formData.amount),
-        date: formData.date.toISOString().split('T')[0]
-      };
+         const expenseData = {
+           title: formData.title,
+           amount: parseFloat(formData.amount),
+           description: formData.description,
+           categoryId: CATEGORY_IDS[formData.category],// Must be a number for backend
+           date: formData.date.toISOString().split("T")[0], // "YYYY-MM-DD"
+           type: formData.type,
+         };
 
       let result;
       if (isEditing) {
@@ -110,6 +114,7 @@ const ExpenseForm = ({ open, onClose, expense = null, onSuccess }) => {
       }
     } catch (error) {
       console.error('Error saving expense:', error);
+       setErrors({ form: error.response?.data?.message || error.message });
     } finally {
       setLoading(false);
     }
@@ -211,7 +216,7 @@ const ExpenseForm = ({ open, onClose, expense = null, onSuccess }) => {
                   sx={{ borderRadius: 2 }}
                 >
                   {Object.values(EXPENSE_CATEGORIES).map((category) => (
-                    <MenuItem key={category} value={category}>
+                    <MenuItem key={CATEGORY_IDS[category]} value={category}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <span>{getCategoryIcon(category)}</span>
                         {category}

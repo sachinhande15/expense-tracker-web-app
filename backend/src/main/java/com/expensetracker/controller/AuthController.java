@@ -20,7 +20,7 @@ import jakarta.validation.Valid;
 
 @CrossOrigin()
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
@@ -36,10 +36,10 @@ public class AuthController {
     JwtUtils jwtUtils;
 
     @PostMapping("/login")
+    @CrossOrigin()
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
@@ -47,12 +47,12 @@ public class AuthController {
         UserPrincipal userDetails = (UserPrincipal) authentication.getPrincipal();
 
         return ResponseEntity.ok(new AuthResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail()));
+                userDetails.getUsername()
+                ));
     }
 
     @PostMapping("/register")
+    @CrossOrigin()
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest signUpRequest) {
         if (userService.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity

@@ -1,4 +1,15 @@
 // Expense data types and interfaces
+export const CATEGORY_IDS = {
+  'Food & Dining': 1,
+  'Transportation': 2,
+  'Shopping': 3,
+  'Entertainment': 4,
+  'Healthcare': 5,
+  'Education': 6,
+  'Utilities': 7,
+  'Travel': 8,
+  'Others': 9
+};
 
 export const EXPENSE_CATEGORIES = {
   FOOD_DINING: 'Food & Dining',

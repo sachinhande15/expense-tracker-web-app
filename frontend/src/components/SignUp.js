@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Profiler, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import {
@@ -17,6 +17,7 @@ import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
 import { validateField } from '../utils/errorUtils';
 
 const SignUp = () => {
+  const[username, setUserName] = useState('')
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -30,7 +31,7 @@ const SignUp = () => {
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
 
-  const { signup } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -53,7 +54,12 @@ const SignUp = () => {
 
     setLoading(true);
     try {
-      const result = await signup(email, password, keepLoggedIn);
+      const payload = {
+        username: username, // from form state
+        email: email,
+        password: password,
+      };
+      const result = await register(payload);
       if (result.success) {
         setFormSuccess('Account created successfully! Redirecting to Sign In...');
         setTimeout(() => navigate('/login'), 2000);
@@ -98,6 +104,18 @@ const SignUp = () => {
         {formSuccess && <Alert severity="success" sx={{ mb: 2 }}>{formSuccess}</Alert>}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <TextField
+            label="Username"
+            value={username}
+            onChange={(e) => setUserName(e.target.value)}
+            error={!!emailError}
+            helperText={emailError}
+            fullWidth
+            variant="outlined"
+            sx={{
+              '& .MuiOutlinedInput-root': { borderRadius: '12px', '&.Mui-focused fieldset': { borderColor: 'primary.main' } }
+            }}
+          />
           <TextField
             label="Email"
             value={email}

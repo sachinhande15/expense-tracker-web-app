@@ -24,6 +24,8 @@ const ExpenseCard = ({ expense, onEdit, onDelete }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
+  console.log("Expense from expense card is ", expense)
+
   const handleMenuClick = (event) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
@@ -34,13 +36,13 @@ const ExpenseCard = ({ expense, onEdit, onDelete }) => {
   };
 
   const handleEdit = () => {
-    handleMenuClose();
     onEdit(expense);
+    handleMenuClose();
   };
 
   const handleDelete = () => {
-    handleMenuClose();
     onDelete(expense);
+    handleMenuClose();
   };
 
   const isIncome = expense.type === 'income';
@@ -89,7 +91,7 @@ const ExpenseCard = ({ expense, onEdit, onDelete }) => {
                   fontSize: '1.5rem'
                 }}
               >
-                {getCategoryIcon(expense.category)}
+                {getCategoryIcon(expense.categoryName)}
               </Avatar>
               <Box sx={{ flex: 1 }}>
                 <Typography
@@ -105,7 +107,7 @@ const ExpenseCard = ({ expense, onEdit, onDelete }) => {
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Chip
-                    label={expense.category}
+                    label={expense.categoryName}
                     size="small"
                     sx={{
                       bgcolor: categoryColor + '20',
@@ -145,7 +147,7 @@ const ExpenseCard = ({ expense, onEdit, onDelete }) => {
                 size="small"
                 onClick={handleMenuClick}
                 sx={{
-                  opacity: 0,
+                  opacity: 1,
                   transition: 'opacity 0.2s ease-in-out',
                   '&:hover': {
                     bgcolor: 'rgba(0,0,0,0.04)'

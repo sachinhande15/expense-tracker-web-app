@@ -1,8 +1,8 @@
 import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-
+import { EXPENSE_CATEGORIES , CATEGORY_ICONS} from "../types/expense";
 // Format currency values
-export const formatCurrency = (amount, currency = 'USD') => {
-  return new Intl.NumberFormat('en-US', {
+export const formatCurrency = (amount, currency = 'INR') => {
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: currency,
   }).format(amount);
@@ -52,18 +52,12 @@ export const getRelativeTime = (dateString) => {
 
 // Get category icon
 export const getCategoryIcon = (category) => {
-  const icons = {
-    'Food & Dining': '🍽️',
-    'Transportation': '🚗',
-    'Shopping': '🛍️',
-    'Entertainment': '🎬',
-    'Healthcare': '⚕️',
-    'Education': '📚',
-    'Utilities': '💡',
-    'Travel': '✈️',
-    'Others': '📦'
-  };
-  return icons[category] || '📦';
+  if (!category) return '📦'; // default icon for undefined
+  // Normalize category to match CATEGORY_ICONS keys
+  const found = Object.values(EXPENSE_CATEGORIES).find(
+    (c) => c.toLowerCase() === category.toLowerCase()
+  );
+  return CATEGORY_ICONS[found] || '📦';
 };
 
 // Get category color

@@ -30,8 +30,8 @@ public class WebSecurityConfig {
 
     @Autowired
     public WebSecurityConfig(UserDetailsServiceImpl userDetailsService,
-                           AuthEntryPointJwt unauthorizedHandler,
-                           AuthTokenFilter authTokenFilter) {
+            AuthEntryPointJwt unauthorizedHandler,
+            AuthTokenFilter authTokenFilter) {
         this.userDetailsService = userDetailsService;
         this.unauthorizedHandler = unauthorizedHandler;
         this.authTokenFilter = authTokenFilter;
@@ -62,8 +62,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/api/auth/**", "/h2-console/**").permitAll()
-                        .anyRequest().authenticated()
-                );
+                        .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);

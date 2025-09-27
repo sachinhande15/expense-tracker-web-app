@@ -47,7 +47,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const result = await login(email, password, keepLoggedIn);
+      const result = await login(email, password);
       if (result.success) {
         navigate('/dashboard');
       } else {

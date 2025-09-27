@@ -7,13 +7,9 @@ import {
   DialogActions,
   Button,
   Box,
-  Typography,
-  Fade
+  Typography
 } from '@mui/material';
-import {
-  Delete,
-  Warning
-} from '@mui/icons-material';
+import { Delete, Warning } from '@mui/icons-material';
 import { formatCurrency, getCategoryIcon } from '../../utils/helpers';
 
 const DeleteConfirmDialog = ({ open, onClose, onConfirm, expense }) => {
@@ -30,15 +26,7 @@ const DeleteConfirmDialog = ({ open, onClose, onConfirm, expense }) => {
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 3,
-          boxShadow: '0 20px 60px rgba(0,0,0,0.1)',
-          overflow: 'visible'
-        }
-      }}
-      TransitionComponent={Fade}
-      transitionDuration={300}
+      PaperProps={{ sx: { borderRadius: 3, overflow: 'visible' } }}
     >
       {/* Warning Icon */}
       <Box
@@ -54,7 +42,6 @@ const DeleteConfirmDialog = ({ open, onClose, onConfirm, expense }) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: '0 4px 20px rgba(244, 67, 54, 0.3)',
           zIndex: 1
         }}
       >
@@ -98,20 +85,10 @@ const DeleteConfirmDialog = ({ open, onClose, onConfirm, expense }) => {
               {getCategoryIcon(expense.category)}
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {expense.title}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {expense.category}
-              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>{expense.title}</Typography>
+              <Typography variant="body2" color="text.secondary">{expense.category}</Typography>
             </Box>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                color: 'error.main'
-              }}
-            >
+            <Typography variant="h6" sx={{ fontWeight: 700, color: 'error.main' }}>
               -{formatCurrency(expense.amount)}
             </Typography>
           </Box>
@@ -129,15 +106,7 @@ const DeleteConfirmDialog = ({ open, onClose, onConfirm, expense }) => {
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-        <Button
-          onClick={onClose}
-          variant="outlined"
-          sx={{
-            borderRadius: 2,
-            textTransform: 'none',
-            px: 3
-          }}
-        >
+        <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 2, textTransform: 'none', px: 3 }}>
           Cancel
         </Button>
         <Button
@@ -150,9 +119,7 @@ const DeleteConfirmDialog = ({ open, onClose, onConfirm, expense }) => {
             textTransform: 'none',
             px: 3,
             bgcolor: 'error.main',
-            '&:hover': {
-              bgcolor: 'error.dark'
-            }
+            '&:hover': { bgcolor: 'error.dark' }
           }}
         >
           Delete Expense
