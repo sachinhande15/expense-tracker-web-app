@@ -23,8 +23,8 @@ backend/.mvn/
 backend/mvnw
 backend/mvnw.cmd
 # Ignore sensitive configuration files
-backend/application*.properties
-backend/application*.yml
+backend/src/main/resources/application*.properties
+backend/src/main/resources/application*.yml
 
 
 
