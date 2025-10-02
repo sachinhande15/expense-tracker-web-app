@@ -22,8 +22,12 @@ backend/.idea/
 backend/.mvn/
 backend/mvnw
 backend/mvnw.cmd
+backend/resources/application-prod.properties
+
 
 # ---- Common ----
 .DS_Store
 *.log
 *.tmp
+*.json
+
