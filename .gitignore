@@ -33,5 +33,6 @@ backend/src/main/resources/application*.yml
 *.log
 *.tmp
 *.json
-
+*.json
+*.md
 
