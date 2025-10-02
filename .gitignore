@@ -22,7 +22,10 @@ backend/.idea/
 backend/.mvn/
 backend/mvnw
 backend/mvnw.cmd
-backend/resources/application-prod.properties
+# Ignore sensitive configuration files
+backend/application*.properties
+backend/application*.yml
+
 
 
 # ---- Common ----
@@ -30,4 +33,5 @@ backend/resources/application-prod.properties
 *.log
 *.tmp
 *.json
+
 
