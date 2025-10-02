@@ -85,7 +85,7 @@ export const calculatePercentage = (value, total) => {
 // Group expenses by category
 export const groupExpensesByCategory = (expenses) => {
   return expenses.reduce((groups, expense) => {
-    const category = expense.category;
+    const category = expense.categoryName;
     if (!groups[category]) {
       groups[category] = [];
     }

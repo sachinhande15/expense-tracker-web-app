@@ -49,7 +49,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
-    console.log("user data is ", userData)
     try {
       const response = await expenseService.register(userData);
       if (response.success) {

@@ -3,7 +3,7 @@
 
 const API_CONFIG = {
   // Base URL for the API - update this when backend is deployed
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
+  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:8080/expense_tracker/api',
 
   // API Endpoints
   ENDPOINTS: {

@@ -230,7 +230,7 @@ const ExpenseList = ({ onEdit }) => {
       </Grid>
 
       {/* Filters and Search */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
+      <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 6}}>
         <Box
           sx={{
             display: "flex",
@@ -246,15 +246,15 @@ const ExpenseList = ({ onEdit }) => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
+                  <Search/>
+                </InputAdornment> 
               ),
             }}
-            sx={{ flex: 1, minWidth: 200 }}
+            sx={{ flex: 1, minWidth: 100}}
           />
 
           {/* Category Filter */}
-          <FormControl sx={{ minWidth: 150 }}>
+          <FormControl sx={{ minWidth:200 }}>
             <InputLabel>Category</InputLabel>
             <Select
               value={selectedCategory}
@@ -291,7 +291,7 @@ const ExpenseList = ({ onEdit }) => {
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 100 }}>
+          <FormControl sx={{ minWidth: 100}}>
             <InputLabel>Order</InputLabel>
             <Select
               value={sortOrder}

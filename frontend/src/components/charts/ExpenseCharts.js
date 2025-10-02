@@ -57,7 +57,7 @@ const ExpenseCharts = () => {
     const monthlyTotals = getMonthlyTotals(expenses);
     return Object.entries(monthlyTotals)
       .map(([month, data]) => ({
-        month: new Date(month + "-01").toLocaleDateString("en-US", {
+        month: new Date(month + "-01").toLocaleDateString("en-IN", {
           month: "short",
           year: "numeric",
         }),
@@ -80,7 +80,7 @@ const ExpenseCharts = () => {
       const total = dayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
 
       last30Days.push({
-        date: date.toLocaleDateString("en-US", {
+        date: date.toLocaleDateString("en-IN", {
           month: "short",
           day: "numeric",
         }),
@@ -130,14 +130,14 @@ const ExpenseCharts = () => {
   };
 
   const renderCategoryChart = () => (
-    <Grid container spacing={3} justifyContent="center">
+    <Grid container spacing={12} justifyContent="center">
       <Grid item xs={12} md={6}>
-        <Card elevation={2} sx={{ borderRadius: 3, mx: 'auto' }}>
+        <Card elevation={2} sx={{ borderRadius: 10, mx: 'auto',width :300 }}>
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Expenses by Category
             </Typography>
-            <Box sx={{ height: 300, display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{ height: 300, display: 'flex', justifyContent: 'center'}}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -169,7 +169,7 @@ const ExpenseCharts = () => {
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Card elevation={2} sx={{ borderRadius: 3, mx: 'auto' }}>
+        <Card elevation={2} sx={{ borderRadius: 10, width :300, mx: 'auto' }}>
           <CardContent>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Category Breakdown
@@ -238,7 +238,7 @@ const ExpenseCharts = () => {
               <YAxis
                 stroke={theme.palette.text.secondary}
                 fontSize={12}
-                tickFormatter={(value) => `$${value}`}
+                tickFormatter={(value) => `${value}`}
               />
               <Tooltip content={<CustomTooltip />} />
               <Area
@@ -279,7 +279,7 @@ const ExpenseCharts = () => {
               <YAxis
                 stroke={theme.palette.text.secondary}
                 fontSize={12}
-                tickFormatter={(value) => `$${value}`}
+                tickFormatter={(value) => `${value}`}
               />
               <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="amount" fill="#2196f3" radius={[2, 2, 0, 0]} />
